@@ -43,5 +43,5 @@ __global__ void sum_reduce(uint32_t *list, uint32_t *temp_list, uint32_t *result
 
 extern "C"
 void sum(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size) {
-    sum_reduce<<<1, 512>>>(list, temp_list, results, list_size);
+    sum_reduce<<<1, min(list_size, 1024)>>>(list, temp_list, results, list_size);
 }
