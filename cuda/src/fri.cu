@@ -1,5 +1,4 @@
 #include "../include/fri.cuh"
-#include <cstdio>
 
 __global__ void sum_reduce(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size) {
     const uint32_t block_thread_index = threadIdx.x;
