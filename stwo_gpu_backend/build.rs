@@ -11,6 +11,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}/src/circle.cu", CUDA_LIB_DIR);
     println!("cargo:rerun-if-changed={}/src/utils.cu", CUDA_LIB_DIR);
     println!("cargo:rerun-if-changed={}/src/fri.cu", CUDA_LIB_DIR);
+    println!("cargo:rerun-if-changed={}/src/fields.cu", CUDA_LIB_DIR);
 
     // Header files
     println!(
@@ -29,23 +30,12 @@ fn main() {
 
     // Build cuda code
     println!("cargo:rustc-link-search={}", CUDA_LIB_DIR);
-    let status = std::process::Command::new("nvcc")
-        .args([
-            "-arch=sm_50",
-            "-Xcompiler",
-            "-fPIC",
-            "-shared",
-            "-o",
-            &format!("{}/libgpubackend.so", CUDA_LIB_DIR),
-            &format!("{}/src/batch_inverse.cu", CUDA_LIB_DIR),
-            &format!("{}/src/bit_reverse.cu", CUDA_LIB_DIR),
-            &format!("{}/src/circle.cu", CUDA_LIB_DIR),
-            &format!("{}/src/utils.cu", CUDA_LIB_DIR),
-            &format!("{}/src/fri.cu", CUDA_LIB_DIR),
-        ])
+
+    let status = std::process::Command::new("make")
+        .args([&format!("{}/Makefile", CUDA_LIB_DIR)])
         .status()
-        .expect("Failed to execute nvcc");
+        .expect("Failed to execute make");
     if !status.success() {
-        panic!("nvcc failed with status: {}", status);
+        panic!("make failed with status: {}", status);
     }
 }
