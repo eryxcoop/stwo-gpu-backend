@@ -1,7 +1,5 @@
 #include "../include/fri.cuh"
-
-void sum_list(uint32_t *results, const uint32_t block_thread_index, const uint32_t half_list_size,
-              const uint32_t *list_to_sum_in_block, uint32_t &thread_result);
+#include <cstdio>
 
 __device__ void sum_list(uint32_t *results, const uint32_t block_thread_index, const uint32_t half_list_size,
               const uint32_t *list_to_sum_in_block, uint32_t &thread_result) {
@@ -43,5 +41,8 @@ __global__ void sum_reduce(uint32_t *list, uint32_t *temp_list, uint32_t *result
 
 extern "C"
 void sum(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size) {
-    sum_reduce<<<1, min(list_size, 1024)>>>(list, temp_list, results, list_size);
+    int block_dim = 1024;
+    int num_blocks = (list_size + block_dim - 1) / block_dim;
+    printf("Num blocks: %d\tBlock dim: %d\n", num_blocks, block_dim);
+    sum_reduce<<<num_blocks, min(list_size, block_dim)>>>(list, temp_list, results, list_size);
 }
