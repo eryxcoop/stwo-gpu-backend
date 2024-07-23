@@ -60,3 +60,27 @@ uint32_t sum(uint32_t *list, const uint32_t list_size) {
     }
     return result;
 }
+
+__global__ void compute_g_values_aux(uint32_t *f_values, uint32_t *results, int size, uint32_t lambda) {
+    // Computes one coordinate of the QM31 g_values for the decomposition f = g + lambda * v_n at the first step of FRI.
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx < size) {
+        if (idx < (size >> 1)) {
+            results[idx] = sub(f_values[idx], lambda);
+        }
+        if (idx >= (size >> 1)) {
+            results[idx] = add(f_values[idx], lambda);
+        }
+    }
+}
+
+
+uint32_t* compute_g_values(uint32_t *f_values, uint32_t size, uint32_t lambda) {
+    int block_dim = 1024;
+    int num_blocks = (size + block_dim - 1) / block_dim;
+    uint32_t* results = cuda_alloc_zeroes_uint32_t(size);
+    compute_g_values_aux<<<num_blocks, min(size, block_dim)>>>(f_values, results, size, lambda);
+
+    return results;
+}

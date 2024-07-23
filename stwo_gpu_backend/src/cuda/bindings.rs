@@ -2,6 +2,7 @@ use stwo_prover::core::{
     circle::CirclePoint,
     fields::{m31::BaseField, qm31::SecureField},
 };
+use stwo_prover::core::fields::m31::M31;
 
 #[link(name = "gpubackend")]
 extern "C" {
@@ -120,4 +121,13 @@ extern "C" {
         list: *const u32,
         list_size: u32,
     ) -> BaseField;
+}
+
+#[link(name = "gpubackend")]
+extern "C" {
+    pub fn compute_g_values(
+        f_values: *const u32,
+        size: usize,
+        lambda: M31
+    ) -> *const u32;
 }
