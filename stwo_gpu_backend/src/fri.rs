@@ -122,6 +122,6 @@ mod tests {
 
     #[test]
     fn test_decompose_using_more_than_entire_block() {
-        test_decompose_with_domain_log_size(12);
+        test_decompose_with_domain_log_size(11+4);
     }
 }

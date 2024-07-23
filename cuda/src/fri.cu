@@ -1,6 +1,6 @@
 #include "../include/fri.cuh"
 #include "../include/utils.cuh"
-#include <cstdio>
+#include <stdio.h>
 
 __device__ void sum_block_list(uint32_t *results, const uint32_t block_thread_index, const uint32_t half_list_size,
                                const uint32_t *list_to_sum_in_block, uint32_t &thread_result) {
@@ -50,11 +50,13 @@ uint32_t sum(uint32_t *list, const uint32_t list_size) {
     uint32_t* partial_results = cuda_alloc_zeroes_uint32_t(num_blocks);
     sum_reduce<<<num_blocks, min(list_size, block_dim)>>>(list, temp_list, partial_results, list_size);
 
-    uint32_t* results = (uint32_t*) malloc(sizeof(uint32_t));
+    uint32_t* results = (uint32_t*) malloc(sizeof(uint32_t)*num_blocks);
     copy_uint32_t_vec_from_device_to_host(partial_results, results, num_blocks);
+    free_uint32_t_vec(temp_list);
+    free_uint32_t_vec(partial_results);
     uint32_t result = 0;
     for(uint32_t i=0; i < num_blocks; i++) {
-        result += results[i];
+        result = add(result, results[i]);
     }
     return result;
 }
