@@ -118,8 +118,6 @@ extern "C" {
 extern "C" {
     pub fn sum(
         list: *const u32,
-        temp_list: *const u32,
-        results: *const u32,
         list_size: u32,
-    );
+    ) -> BaseField;
 }

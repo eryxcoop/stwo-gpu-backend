@@ -1,8 +1,9 @@
 #include "../include/fri.cuh"
+#include "../include/utils.cuh"
 #include <cstdio>
 
-__device__ void sum_list(uint32_t *results, const uint32_t block_thread_index, const uint32_t half_list_size,
-              const uint32_t *list_to_sum_in_block, uint32_t &thread_result) {
+__device__ void sum_block_list(uint32_t *results, const uint32_t block_thread_index, const uint32_t half_list_size,
+                               const uint32_t *list_to_sum_in_block, uint32_t &thread_result) {
     uint32_t list_to_sum_in_block_half_size = min(half_list_size, blockDim.x) >> 1;
     while (block_thread_index < list_to_sum_in_block_half_size) {
         thread_result = add(
@@ -35,14 +36,25 @@ __global__ void sum_reduce(uint32_t *list, uint32_t *temp_list, uint32_t *result
 
         __syncthreads();
 
-        sum_list(results, block_thread_index, half_list_size, list_to_sum_in_block, thread_result);
+        sum_block_list(results, block_thread_index, half_list_size, list_to_sum_in_block, thread_result);
     }
 }
 
 extern "C"
-void sum(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size) {
+uint32_t sum(uint32_t *list, const uint32_t list_size) {
     int block_dim = 1024;
     int num_blocks = (list_size / 2 + block_dim - 1) / block_dim;
     printf("Num blocks: %d\tBlock dim: %d\tList size: %d \n", num_blocks, block_dim, list_size);
-    sum_reduce<<<num_blocks, min(list_size, block_dim)>>>(list, temp_list, results, list_size);
+
+    uint32_t* temp_list = cuda_malloc_uint32_t(list_size);
+    uint32_t* partial_results = cuda_alloc_zeroes_uint32_t(num_blocks);
+    sum_reduce<<<num_blocks, min(list_size, block_dim)>>>(list, temp_list, partial_results, list_size);
+
+    uint32_t* results = (uint32_t*) malloc(sizeof(uint32_t));
+    copy_uint32_t_vec_from_device_to_host(partial_results, results, num_blocks);
+    uint32_t result = 0;
+    for(uint32_t i=0; i < num_blocks; i++) {
+        result += results[i];
+    }
+    return result;
 }

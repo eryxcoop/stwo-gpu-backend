@@ -4,6 +4,6 @@
 #include "fields.cuh"
 
 extern "C"
-void sum(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size);
+uint32_t sum(uint32_t *list, const uint32_t list_size);
 
 #endif

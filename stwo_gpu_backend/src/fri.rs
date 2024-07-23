@@ -3,7 +3,7 @@ use stwo_prover::core::{
     fri::FriOps,
     poly::{circle::SecureEvaluation, line::LineEvaluation, twiddles::TwiddleTree},
 };
-use stwo_prover::core::fields::m31::M31;
+use stwo_prover::core::fields::m31::{BaseField, M31};
 use stwo_prover::core::fields::secure_column::SecureColumn;
 
 use crate::backend::CudaBackend;
@@ -53,21 +53,10 @@ impl FriOps for CudaBackend {
 }
 
 impl CudaBackend {
-    unsafe fn sum(column: &BaseFieldVec) -> M31 {
+    unsafe fn sum(column: &BaseFieldVec) -> BaseField {
         let column_size = column.size;
-        let mut temp = BaseFieldVec::new_uninitialized(column_size);
-
-        let mut partial_results = BaseFieldVec::new_uninitialized(1);
-        unsafe {
-            bindings::sum(column.device_ptr,
-                          temp.device_ptr,
-                          partial_results.device_ptr,
-                          column_size as u32);
-        }
-
-        let result = partial_results.to_vec()[0];
-
-        return result;
+        return bindings::sum(column.device_ptr,
+                             column_size as u32);
     }
 }
 
@@ -129,5 +118,10 @@ mod tests {
     #[test]
     fn test_decompose_using_an_entire_block() {
         test_decompose_with_domain_log_size(11);
+    }
+
+    #[test]
+    fn test_decompose_using_more_than_entire_block() {
+        test_decompose_with_domain_log_size(12);
     }
 }
