@@ -43,6 +43,6 @@ extern "C"
 void sum(uint32_t *list, uint32_t *temp_list, uint32_t *results, const uint32_t list_size) {
     int block_dim = 1024;
     int num_blocks = (list_size / 2 + block_dim - 1) / block_dim;
-    printf("Num blocks: %d\tBlock dim: %d\n", num_blocks, block_dim);
+    printf("Num blocks: %d\tBlock dim: %d\tList size: %d \n", num_blocks, block_dim, list_size);
     sum_reduce<<<num_blocks, min(list_size, block_dim)>>>(list, temp_list, results, list_size);
 }
