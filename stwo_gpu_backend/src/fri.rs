@@ -124,4 +124,14 @@ mod tests {
     fn test_decompose_using_more_than_entire_block() {
         test_decompose_with_domain_log_size(11+4);
     }
+
+    #[test]
+    fn test_decompose_using_an_entire_block_for_results() {
+        test_decompose_with_domain_log_size(22);
+    }
+
+    #[test]
+    fn test_decompose_using_more_than_an_entire_block_for_results() {
+        test_decompose_with_domain_log_size(27);
+    }
 }
